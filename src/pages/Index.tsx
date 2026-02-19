@@ -49,7 +49,7 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/login")}
               className="h-9 px-5 rounded-xl btn-glow-outline text-sm font-medium"
             >
               Log In
@@ -57,7 +57,7 @@ const Index = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/register")}
               className="h-9 px-5 rounded-xl btn-glow text-sm font-medium text-primary-foreground"
             >
               Get Started
@@ -90,13 +90,13 @@ const Index = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/register")}
                 className="h-12 px-8 rounded-2xl btn-glow text-sm font-semibold text-primary-foreground flex items-center gap-2"
               >
                 Start Free Trial <ArrowRight className="w-4 h-4" />
               </motion.button>
               <button
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/login")}
                 className="h-12 px-8 rounded-2xl btn-glow-outline text-sm font-semibold"
               >
                 View Demo
@@ -154,6 +154,41 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Pricing */}
+        <section className="px-6 lg:px-12 pb-24 max-w-6xl mx-auto">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-3">Simple, transparent <span className="text-gradient-cosmic">pricing</span></h2>
+            <p className="text-muted-foreground">Start free. Scale as you grow.</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { name: "Starter", price: "$0", period: "/month", features: ["5 Projects", "3 Team Members", "Basic Reports", "1GB Storage"], glow: "none" as const },
+              { name: "Pro", price: "$29", period: "/month", features: ["Unlimited Projects", "25 Team Members", "AI Features", "Advanced Reports", "50GB Storage"], glow: "cyan" as const },
+              { name: "Enterprise", price: "$99", period: "/month", features: ["Everything in Pro", "Unlimited Members", "Custom Integrations", "Priority Support", "SSO & SAML"], glow: "purple" as const },
+            ].map((plan, i) => (
+              <GlassCard key={plan.name} delay={i * 0.1} glow={plan.glow} className={i === 1 ? "ring-1 ring-primary/30" : ""}>
+                <h3 className="font-semibold text-sm mb-1">{plan.name}</h3>
+                <div className="flex items-baseline gap-1 mb-4">
+                  <span className="text-3xl font-bold">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
+                </div>
+                <ul className="space-y-2 mb-6">
+                  {plan.features.map((f) => (
+                    <li key={f} className="text-sm text-muted-foreground flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate("/register")}
+                  className={`w-full h-10 rounded-xl text-sm font-semibold ${i === 1 ? "btn-glow text-primary-foreground" : "btn-glow-outline"}`}>
+                  {i === 0 ? "Get Started" : "Start Trial"}
+                </motion.button>
+              </GlassCard>
+            ))}
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="px-6 pb-24 max-w-3xl mx-auto text-center">
           <GlassCard hover={false} glow="cyan" className="py-12">
@@ -164,7 +199,7 @@ const Index = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/register")}
               className="h-12 px-8 rounded-2xl btn-glow text-sm font-semibold text-primary-foreground"
             >
               Get Started — It's Free
