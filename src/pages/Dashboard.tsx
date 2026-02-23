@@ -1,197 +1,119 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import { useState } from "react";
+import MainLayout from "@/components/MainLayout";
 import GlassCard from "@/components/GlassCard";
+import CreateTaskModal from "@/components/CreateTaskModal";
+import CreateProjectModal from "@/components/CreateProjectModal";
+import TaskDetailModal from "@/components/TaskDetailModal";
 import { motion } from "framer-motion";
-import {
-  TrendingUp,
-  CheckCircle2,
-  Clock,
-  Users,
-  Sparkles,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from "recharts";
+import { useApp } from "@/contexts/AppContext";
+import { TrendingUp, CheckCircle2, Clock, FolderKanban, ArrowUpRight, AlertTriangle, Plus, Sparkles } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-const stats = [
-  { label: "Total Projects", value: "24", change: "+12%", up: true, icon: TrendingUp, glow: "cyan" as const },
-  { label: "Tasks Completed", value: "156", change: "+8%", up: true, icon: CheckCircle2, glow: "purple" as const },
-  { label: "Hours Tracked", value: "1,240", change: "-3%", up: false, icon: Clock, glow: "pink" as const },
-  { label: "Team Members", value: "18", change: "+2", up: true, icon: Users, glow: "cyan" as const },
+const trendData = [
+  { month: "Jan", tasks: 42 }, { month: "Feb", tasks: 58 }, { month: "Mar", tasks: 35 },
+  { month: "Apr", tasks: 72 }, { month: "May", tasks: 65 }, { month: "Jun", tasks: 88 },
 ];
-
-const chartData = [
-  { name: "Mon", tasks: 12, hours: 8 },
-  { name: "Tue", tasks: 19, hours: 10 },
-  { name: "Wed", tasks: 15, hours: 7 },
-  { name: "Thu", tasks: 22, hours: 11 },
-  { name: "Fri", tasks: 28, hours: 9 },
-  { name: "Sat", tasks: 8, hours: 4 },
-  { name: "Sun", tasks: 5, hours: 2 },
-];
-
-const recentTasks = [
-  { name: "Design system update", project: "NovaPM", status: "In Progress", priority: "High" },
-  { name: "API integration", project: "Client Portal", status: "Review", priority: "Medium" },
-  { name: "User testing", project: "Mobile App", status: "Todo", priority: "High" },
-  { name: "Database migration", project: "Backend", status: "Done", priority: "Low" },
-  { name: "Landing page redesign", project: "Marketing", status: "In Progress", priority: "Medium" },
-];
-
-const priorityColors: Record<string, string> = {
-  High: "text-accent",
-  Medium: "text-primary",
-  Low: "text-muted-foreground",
-};
-
-const statusColors: Record<string, string> = {
-  "In Progress": "bg-primary/20 text-primary",
-  Review: "bg-secondary/20 text-secondary",
-  Todo: "bg-muted text-muted-foreground",
-  Done: "bg-emerald-500/20 text-emerald-400",
-};
-
-const aiInsights = [
-  "3 tasks are at risk of missing their deadline this week",
-  "Team velocity increased 15% compared to last sprint",
-  "Consider reassigning 'API Integration' — assignee is overloaded",
+const distData = [
+  { name: "Todo", value: 12, color: "hsl(234, 15%, 70%)" },
+  { name: "In Progress", value: 8, color: "hsl(187, 100%, 50%)" },
+  { name: "Review", value: 5, color: "hsl(255, 50%, 58%)" },
+  { name: "Done", value: 22, color: "hsl(142, 71%, 45%)" },
 ];
 
 const Dashboard = () => {
+  const { tasks, projects } = useApp();
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<typeof tasks[0] | null>(null);
+  const completedTasks = tasks.filter((t) => t.status === "completed").length;
+  const completionRate = Math.round((completedTasks / tasks.length) * 100);
+  const stats = [
+    { label: "Total Projects", value: projects.length.toString(), change: "+2", icon: FolderKanban, glow: "cyan" as const },
+    { label: "Total Tasks", value: tasks.length.toString(), change: "+5", icon: CheckCircle2, glow: "purple" as const },
+    { label: "Completion Rate", value: `${completionRate}%`, change: "+8%", icon: TrendingUp, glow: "pink" as const },
+    { label: "Overdue", value: "3", change: "-2", icon: AlertTriangle, glow: "none" as const },
+  ];
+  const activity = [
+    { user: "Alex K.", action: "completed", target: "API Integration", time: "2m ago" },
+    { user: "Sarah M.", action: "created project", target: "Mobile App v3", time: "15m ago" },
+    { user: "John D.", action: "commented on", target: "Dashboard Redesign", time: "1h ago" },
+    { user: "Lisa R.", action: "assigned task", target: "Bug Fix Sprint", time: "2h ago" },
+  ];
+
   return (
-    <DashboardLayout title="Dashboard" subtitle="Welcome back, Alex">
-      {/* Stats Grid */}
+    <MainLayout title="Dashboard" subtitle="Welcome back, Alex" breadcrumbs={[{ label: "Home" }, { label: "Dashboard" }]}>
+      <div className="flex gap-3 mb-6 flex-wrap">
+        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setCreateTaskOpen(true)} className="h-9 px-4 rounded-xl btn-glow text-xs font-medium text-primary-foreground flex items-center gap-2"><Plus className="w-3.5 h-3.5" /> New Task</motion.button>
+        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setCreateProjectOpen(true)} className="h-9 px-4 rounded-xl btn-glow-outline text-xs font-medium flex items-center gap-2"><Plus className="w-3.5 h-3.5" /> New Project</motion.button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {stats.map((stat, i) => (
-          <GlassCard key={stat.label} glow={stat.glow} delay={i * 0.1}>
+        {stats.map((s, i) => (
+          <GlassCard key={s.label} glow={s.glow} delay={i * 0.08}>
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                <div className={`flex items-center gap-1 mt-2 text-xs ${stat.up ? "text-emerald-400" : "text-red-400"}`}>
-                  {stat.up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                  {stat.change}
-                </div>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+                <p className="text-3xl font-bold mt-1">{s.value}</p>
+                <div className="flex items-center gap-1 mt-2 text-xs text-emerald-400"><ArrowUpRight className="w-3 h-3" /> {s.change}</div>
               </div>
-              <div className="w-10 h-10 rounded-xl glass flex items-center justify-center">
-                <stat.icon className="w-5 h-5 text-primary" />
-              </div>
+              <div className="w-9 h-9 rounded-xl glass flex items-center justify-center"><s.icon className="w-4 h-4 text-primary" /></div>
             </div>
           </GlassCard>
         ))}
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        {/* Area Chart */}
         <GlassCard className="lg:col-span-2" hover={false} delay={0.3}>
           <h3 className="text-sm font-semibold mb-4">Task Completion Trend</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="taskGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(187, 100%, 50%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(187, 100%, 50%)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={trendData}>
+              <defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(187, 100%, 50%)" stopOpacity={0.3} /><stop offset="95%" stopColor="hsl(187, 100%, 50%)" stopOpacity={0} /></linearGradient></defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(230, 30%, 22%)" />
-              <XAxis dataKey="name" stroke="hsl(234, 15%, 70%)" fontSize={12} />
+              <XAxis dataKey="month" stroke="hsl(234, 15%, 70%)" fontSize={12} />
               <YAxis stroke="hsl(234, 15%, 70%)" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(230, 40%, 12%)",
-                  border: "1px solid hsl(230, 30%, 28%)",
-                  borderRadius: "12px",
-                  color: "#fff",
-                }}
-              />
-              <Area type="monotone" dataKey="tasks" stroke="hsl(187, 100%, 50%)" fill="url(#taskGradient)" strokeWidth={2} />
+              <Tooltip contentStyle={{ background: "hsl(230, 40%, 12%)", border: "1px solid hsl(230, 30%, 28%)", borderRadius: "12px", color: "#fff" }} />
+              <Area type="monotone" dataKey="tasks" stroke="hsl(187, 100%, 50%)" fill="url(#tg)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </GlassCard>
-
-        {/* AI Insights */}
-        <GlassCard glow="purple" hover={false} delay={0.4}>
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="w-4 h-4 text-secondary" />
-            <h3 className="text-sm font-semibold">AI Insights</h3>
-          </div>
-          <div className="space-y-3">
-            {aiInsights.map((insight, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.15 }}
-                className="p-3 rounded-xl glass-subtle text-sm text-muted-foreground leading-relaxed"
-              >
-                {insight}
-              </motion.div>
-            ))}
-          </div>
-        </GlassCard>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Recent Tasks */}
-        <GlassCard className="lg:col-span-2" hover={false} delay={0.5}>
-          <h3 className="text-sm font-semibold mb-4">Recent Tasks</h3>
-          <div className="space-y-2">
-            {recentTasks.map((task, i) => (
-              <motion.div
-                key={task.name}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 + i * 0.08 }}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/20 transition-colors cursor-pointer"
-              >
-                <div>
-                  <p className="text-sm font-medium">{task.name}</p>
-                  <p className="text-xs text-muted-foreground">{task.project}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-xs font-medium ${priorityColors[task.priority]}`}>
-                    {task.priority}
-                  </span>
-                  <span className={`text-xs px-2.5 py-1 rounded-full ${statusColors[task.status]}`}>
-                    {task.status}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </GlassCard>
-
-        {/* Hours Chart */}
-        <GlassCard hover={false} delay={0.6}>
-          <h3 className="text-sm font-semibold mb-4">Hours This Week</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(230, 30%, 22%)" />
-              <XAxis dataKey="name" stroke="hsl(234, 15%, 70%)" fontSize={12} />
-              <YAxis stroke="hsl(234, 15%, 70%)" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(230, 40%, 12%)",
-                  border: "1px solid hsl(230, 30%, 28%)",
-                  borderRadius: "12px",
-                  color: "#fff",
-                }}
-              />
-              <Bar dataKey="hours" fill="hsl(255, 50%, 58%)" radius={[6, 6, 0, 0]} />
-            </BarChart>
+        <GlassCard hover={false} delay={0.4} glow="purple">
+          <h3 className="text-sm font-semibold mb-4">Task Distribution</h3>
+          <ResponsiveContainer width="100%" height={170}>
+            <PieChart><Pie data={distData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={4} dataKey="value">{distData.map((e, i) => <Cell key={i} fill={e.color} />)}</Pie></PieChart>
           </ResponsiveContainer>
+          <div className="flex justify-center gap-3 flex-wrap mt-1">{distData.map((s) => <div key={s.name} className="flex items-center gap-1 text-[10px] text-muted-foreground"><div className="w-2 h-2 rounded-full" style={{ background: s.color }} /> {s.name}</div>)}</div>
         </GlassCard>
       </div>
-    </DashboardLayout>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <GlassCard hover={false} delay={0.5}>
+          <h3 className="text-sm font-semibold mb-4">Recent Tasks</h3>
+          <div className="space-y-2">{tasks.slice(0, 5).map((t) => (
+            <button key={t.id} onClick={() => setSelectedTask(t)} className="w-full text-left flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/20 transition-all">
+              <div className="min-w-0"><p className="text-sm font-medium truncate">{t.title}</p><p className="text-[11px] text-muted-foreground">{t.project}</p></div>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full flex-shrink-0 ml-2 ${t.status === "completed" ? "bg-emerald-500/20 text-emerald-400" : t.status === "in_progress" ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>{t.status.replace("_", " ")}</span>
+            </button>
+          ))}</div>
+        </GlassCard>
+        <GlassCard hover={false} delay={0.5}>
+          <h3 className="text-sm font-semibold mb-4">Recent Activity</h3>
+          <div className="space-y-2.5">{activity.map((a, i) => (
+            <div key={i} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/20 transition-colors">
+              <div className="flex items-center gap-3"><div className="w-7 h-7 rounded-full bg-gradient-cosmic flex items-center justify-center text-[10px] font-bold">{a.user.split(" ").map((n) => n[0]).join("")}</div><p className="text-xs"><span className="font-medium">{a.user}</span> <span className="text-muted-foreground">{a.action}</span> <span className="text-primary">{a.target}</span></p></div>
+              <span className="text-[10px] text-muted-foreground flex-shrink-0">{a.time}</span>
+            </div>
+          ))}</div>
+        </GlassCard>
+      </div>
+      <GlassCard hover={false} delay={0.6} glow="cyan">
+        <div className="flex items-center gap-2 mb-3"><Sparkles className="w-4 h-4 text-primary" /><h3 className="text-sm font-semibold">AI Insights</h3></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="p-3 rounded-xl glass"><p className="text-xs font-medium text-primary">Workload Alert</p><p className="text-xs text-muted-foreground mt-1">John Davis is at 90% capacity. Consider redistributing 2 tasks.</p></div>
+          <div className="p-3 rounded-xl glass"><p className="text-xs font-medium text-accent">Deadline Risk</p><p className="text-xs text-muted-foreground mt-1">Backend Services may miss its deadline by 5 days.</p></div>
+          <div className="p-3 rounded-xl glass"><p className="text-xs font-medium text-emerald-400">Opportunity</p><p className="text-xs text-muted-foreground mt-1">Dashboard Redesign is ahead of schedule.</p></div>
+        </div>
+      </GlassCard>
+      <CreateTaskModal open={createTaskOpen} onClose={() => setCreateTaskOpen(false)} />
+      <CreateProjectModal open={createProjectOpen} onClose={() => setCreateProjectOpen(false)} />
+      <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+    </MainLayout>
   );
 };
 
