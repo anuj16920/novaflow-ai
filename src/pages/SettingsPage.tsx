@@ -19,6 +19,15 @@ const SettingsPage = () => {
   const { currentUser, theme, setTheme } = useApp();
   const [tab, setTab] = useState("profile");
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({
+    "Task assigned to you": true,
+    "Task deadline approaching": true,
+    "New comments on your tasks": true,
+    "Project status updates": false,
+    "Weekly digest email": true,
+  });
+
+  const toggleNotif = (key: string) => setNotifPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <MainLayout title="Settings" breadcrumbs={[{ label: "Home", to: "/dashboard" }, { label: "Settings" }]}>
@@ -92,11 +101,11 @@ const SettingsPage = () => {
             <GlassCard hover={false}>
               <h3 className="text-sm font-semibold mb-4">Notification Preferences</h3>
               <div className="space-y-4">
-                {["Task assigned to you", "Task deadline approaching", "New comments on your tasks", "Project status updates", "Weekly digest email"].map((item) => (
+                {Object.entries(notifPrefs).map(([item, enabled]) => (
                   <div key={item} className="flex items-center justify-between p-3 rounded-xl glass">
                     <span className="text-sm">{item}</span>
-                    <button className="relative w-11 h-6 rounded-full bg-primary transition-all">
-                      <div className="absolute top-1 left-[22px] w-4 h-4 rounded-full bg-foreground" />
+                    <button onClick={() => toggleNotif(item)} className={`relative w-11 h-6 rounded-full transition-all ${enabled ? "bg-primary" : "bg-muted"}`}>
+                      <motion.div animate={{ x: enabled ? 20 : 2 }} transition={{ type: "spring", stiffness: 500, damping: 30 }} className="absolute top-1 w-4 h-4 rounded-full bg-foreground" />
                     </button>
                   </div>
                 ))}

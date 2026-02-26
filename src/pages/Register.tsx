@@ -104,6 +104,29 @@ const Register = () => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {/* Password strength indicator */}
+              {password.length > 0 && (() => {
+                const strength = [
+                  password.length >= 6,
+                  /[A-Z]/.test(password),
+                  /[0-9]/.test(password),
+                  /[^A-Za-z0-9]/.test(password),
+                ].filter(Boolean).length;
+                const labels = ["Weak", "Fair", "Good", "Strong"];
+                const colors = ["bg-destructive", "bg-accent", "bg-primary", "bg-emerald-500"];
+                return (
+                  <div className="mt-2">
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map((i) => (
+                        <div key={i} className={`h-1 flex-1 rounded-full ${i < strength ? colors[strength - 1] : "bg-muted"}`} />
+                      ))}
+                    </div>
+                    <p className={`text-[10px] mt-1 ${strength <= 1 ? "text-destructive" : strength === 2 ? "text-accent" : strength === 3 ? "text-primary" : "text-emerald-400"}`}>
+                      {labels[strength - 1] || "Too short"}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
 
             <motion.button
