@@ -115,7 +115,7 @@ const Index = () => {
                 Start Free Trial <ArrowRight className="w-4 h-4" />
               </motion.button>
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/dashboard")}
                 className="h-12 px-8 rounded-2xl btn-glow-outline text-sm font-semibold"
               >
                 View Demo
