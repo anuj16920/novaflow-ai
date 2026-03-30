@@ -47,6 +47,25 @@ const Index = () => {
             </div>
             <span className="text-lg font-bold text-gradient-cyan">NovaPM</span>
           </div>
+          <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            {[
+              { label: "Dashboard", to: "/dashboard" },
+              { label: "Projects", to: "/projects" },
+              { label: "Tasks", to: "/tasks" },
+              { label: "Kanban", to: "/kanban" },
+              { label: "Reports", to: "/reports" },
+              { label: "Team", to: "/team" },
+              { label: "Calendar", to: "/calendar" },
+            ].map((link) => (
+              <button
+                key={link.to}
+                onClick={() => navigate(link.to)}
+                className="hover:text-foreground transition-colors"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/login")}
@@ -96,7 +115,7 @@ const Index = () => {
                 Start Free Trial <ArrowRight className="w-4 h-4" />
               </motion.button>
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/dashboard")}
                 className="h-12 px-8 rounded-2xl btn-glow-outline text-sm font-semibold"
               >
                 View Demo
